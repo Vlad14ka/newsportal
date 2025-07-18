@@ -18,6 +18,7 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.web.client.RestTemplate;
 
 
 @Configuration // Указывает Spring, что это класс конфигурации
@@ -53,6 +54,11 @@ public class SecurityConfig {
         return authProvider;
     }
 
+    @Bean // <-- НОВЫЙ БИН
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+
     // Конфигурация цепочки фильтров безопасности HTTP
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -63,7 +69,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/news/**").permitAll() // Разрешаем всем доступ к новостям
                         .requestMatchers("/api/comments/**").permitAll() // Разрешаем всем доступ к комментариям
                         .requestMatchers("/api/auth/**").permitAll() // Разрешаем доступ к эндпоинтам аутентификации (регистрация, логин)
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN") // Только для ролей ADMIN
+                        .requestMatchers("/api/comments/news/{newsId}").permitAll()
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")// Только для ролей ADMIN
+                        .requestMatchers("/api/likes/news/{newsId}/count").permitAll()// dostup k komam
+                        .requestMatchers("/api/weather/**").permitAll() // Разрешаем доступ к погодному API
                         // Все остальные запросы требуют аутентификации
                         .anyRequest().authenticated()
                 );
